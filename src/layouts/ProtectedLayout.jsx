@@ -39,6 +39,14 @@ import { useAuth } from "../utils/useAuth";
 
 const drawerWidth = 240;
 
+const elementsNavigate = [
+  {
+    URL: "/dashboard", // función para navegar al dashboard
+    icon: <InboxIcon />,
+    text: "Menu principal",
+  },
+];
+
 // ----- estilos dinámicos -----
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   ({ theme, open }) => ({
@@ -139,13 +147,14 @@ const ProtectedLayout = () => {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Dashboard", "Perfil", "Configuración"].map((text, index) => (
-            <ListItem key={text} disablePadding>
+          {elementsNavigate.map((item) => (
+            <ListItem key={item.text} disablePadding onClick={() => navigate(item.URL)}>
               <ListItemButton>
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
+                  {item.icon}
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={item.text} />
               </ListItemButton>
             </ListItem>
           ))}

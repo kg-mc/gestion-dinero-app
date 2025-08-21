@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../utils/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -11,12 +11,13 @@ const LoginComponent = ({ setOption }) => {
   });
 
   //
-  if (loading) return <div>Cargando...</div>;
-  if (user) {
-    // Si el usuario ya está autenticado, redirigir a la página de dashboard
-    navigate("/dashboard");
-  }
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
   //
+  if (loading) return <div>Cargando...</div>;
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -37,8 +38,8 @@ const LoginComponent = ({ setOption }) => {
       console.log(user);
       return;
     }
-    console.log("Sesion iniciada")
-    navigate("/dashboard")
+    console.log("Sesion iniciada");
+    navigate("/dashboard");
 
     /* if (inputValue.user !== "" && inputValue.password !== "") {
       console.log("Usuario:", inputValue.user);

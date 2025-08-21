@@ -3,9 +3,10 @@ import { createBrowserRouter } from "react-router-dom";
 import HomePage from "./pages/home/Home";
 import Login from "./auth/LoginPage";
 import ProtectedLayout from "./layouts/ProtectedLayout";
-import DashboardPage from "./pages/dashboard/Dashboard";
+
 import PublicLayout from "./layouts/PublicLayout";
 import ErrorPage from "./layouts/ErrorPage";
+import MenuPrincipalPage from "./pages/MenuPrincipal/MenuPrincipal";
 /* 
 const router = createBrowserRouter([
   {
@@ -46,14 +47,15 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "dashboard", // opcional: índice en /dashboard
-        element: <DashboardPage />,
+        path: "", // opcional: índice en /dashboard
+        element: <MenuPrincipalPage />,
       },
     ],
   },
   {
     path: "/",
     element: <PublicLayout />,
+    errorElement: <ErrorPage />, // página de error
     children: [
       {
         path: "login",
