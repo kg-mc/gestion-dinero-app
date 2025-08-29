@@ -1,11 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import supabase from "../../utils/supabase";
 
 function OpcionesMonedas() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.from("tipo_moneda").select("*");
+      if (error) {
+        console.error("Error al obtener las monedas:", error);
+      } else {
+        setData(data);
+      }
+    };
+    fetchData();
+  }, []);
   const monedas = [
-    { value: "PEN", label: "Soles" },
-    { value: "USD", label: "Dólares" },
-    { value: "EUR", label: "Euros" },
-    { value: "CLP", label: "Pesos chilenos" },
+    { value: "0", label: "Seleccionar moneda" },
+    ...data.map((item) => ({
+      value: item.id,
+      label: item.name + " - " + item.cod,
+    })),
   ];
 
   return monedas.map((moneda) => (
@@ -18,13 +32,24 @@ function OpcionesMonedas() {
     </option>
   ));
 }
-function CateogriasGastos() {
+
+function CategoriasGastos() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.from("tipo_accion").select("*");
+      if (error) {
+        console.error("Error al obtener las categorías:", error);
+      } else {
+        setData(data);
+      }
+    };
+    fetchData();
+  }, []);
+  console.log(data);
   const categorias = [
-    { value: "seleccionar", label: "Seleccionar categoría" },
-    { value: "comida", label: "Comida" },
-    { value: "transporte", label: "Transporte" },
-    { value: "entretenimiento", label: "Entretenimiento" },
-    { value: "salud", label: "Salud" },
+    { value: "0", label: "Seleccionar categoría" },
+    ...data.map((item) => ({ value: item.id, label: item.name })),
   ];
   return categorias.map((categoria) => (
     <option
@@ -36,6 +61,35 @@ function CateogriasGastos() {
     </option>
   ));
 }
+
+function TipoTransaccion() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.from("tipo_cat").select("*");
+      if (error) {
+        console.error("Error al obtener las categorías:", error);
+      } else {
+        setData(data);
+      }
+    };
+    fetchData();
+  }, []);
+  const transacciones = [
+    { value: "0", label: "Seleccionar tipo de transacción" },
+    ...data.map((item) => ({ value: item.id, label: item.name })),
+  ];
+  return transacciones.map((transaccion) => (
+    <option
+      key={transaccion.value}
+      value={transaccion.value}
+      className="border-2 border-gray-300 bg-cyan-950"
+    >
+      {transaccion.label}
+    </option>
+  ));
+}
+
 /* 
 <option value="USD" >
           Dólar estadounidense
@@ -51,17 +105,47 @@ function CateogriasGastos() {
         </option> */
 
 export default function RegistrarGastos() {
-  const [data, setData] = useState({ moneda: "PEN", categoria: "", tipo: "gasto", cantidad: "", infoAdi: "" });
+  const [datos, setDatos] = useState({
+    moneda: "",
+    categoria: "",
+    tipo: "",
+    cantidad: "",
+    infoAdi: "",
+  });
   const handleInput = (e) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
+    setDatos((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(data);
+    if (
+      datos.moneda < 1 ||
+      datos.categoria < 1 ||
+      datos.tipo < 1 ||
+      datos.cantidad === ""
+    ) {
+      console.log("Por favor, complete todos los campos obligatorios.");
+      return;
+    }
+    console.log("Datos a enviar:", datos);
+
+    const { data, error } = await supabase.from("registros").insert([
+      {
+        moneda_id: datos.moneda,
+        accion_id: datos.categoria,
+        cat_id: datos.tipo,
+        cantidad: datos.cantidad,
+        info_adic: datos.infoAdi,
+      },
+    ]);
+    if (error) {
+      console.log("Error al registrar el gasto:", error);
+    } else {
+      console.log("Gasto registrado con éxito:", data);
+    }
   };
 
   return (
@@ -84,7 +168,7 @@ export default function RegistrarGastos() {
         onChange={handleInput}
         className="border-2 border-gray-300 rounded-md p-2 focus:outline-none focus:border-cyan-500"
       >
-        <CateogriasGastos />
+        <CategoriasGastos />
       </select>
 
       <label htmlFor="tipo">Tipo transaccion</label>
@@ -95,21 +179,25 @@ export default function RegistrarGastos() {
         onChange={handleInput}
         className="border-2 border-gray-300 rounded-md p-2 focus:outline-none focus:border-cyan-500"
       >
-        <option value="gasto">Gasto</option>
-        <option value="ingreso">Ingreso</option>
-        <option value="prestamo">Prestamo</option>
-        <option value="deuda">Deuda</option>
-        <option value="inversion">Inversión</option>
+        <TipoTransaccion />
       </select>
       <label htmlFor="cantidad">Cantidad</label>
       <input
         type="number"
+        step="any"
         name="cantidad"
         onChange={handleInput}
+        min="0"
         className="border-2 border-gray-300 rounded-md p-2 focus:outline-none focus:border-cyan-500"
       />
       <label htmlFor="infoAdi">Informacion adicional</label>
-      <input type="text" className="border-2 border-gray-300 rounded-md p-2 focus:outline-none focus:border-cyan-500" />
+      <input
+        name="infoAdi"
+        onChange={handleInput}
+        id="infoAdi"
+        type="text"
+        className="border-2 border-gray-300 rounded-md p-2 focus:outline-none focus:border-cyan-500"
+      />
       <button className="boder-2 border-black rounded-md p-2 bg-cyan-600 hover:bg-cyan-700 transition-colors duration-300">
         Enviar informacion
       </button>
