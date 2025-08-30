@@ -12,7 +12,7 @@ COPY . .
 RUN npm run build
 
 # Etapa 2: Servir con Nginx
-FROM nginx:alpine
+FROM nginx:alpine AS nginx
 
 # Elimina configuración default de nginx
 RUN rm -rf /usr/share/nginx/html/*
