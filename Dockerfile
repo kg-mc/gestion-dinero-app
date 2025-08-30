@@ -1,13 +1,20 @@
-# Etapa 1: Build
-FROM node:18-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# Imagen base
+FROM node:20-alpine
 
-# Etapa 2: Servir con Nginx
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Definir directorio de trabajo
+WORKDIR /app
+
+# Copiar dependencias
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install --production
+
+# Copiar el resto del código
+COPY . .
+
+# Exponer puerto
+EXPOSE 3000
+
+# Comando de inicio
+CMD ["npm", "start"]
